@@ -444,3 +444,55 @@ def search_holidays(
 
 # Registrar todas las extensiones
 register_all_extensions(mcp)
+
+@mcp.tool
+def odoo_pos_ventas_por_tienda_y_fecha(
+    fields: list,
+    domain: list = None,
+    groupby: list = None,
+    limit: int = 80,
+    offset: int = 0,
+    orderby: str = None
+) -> list:
+    """
+    Usa pos.order con read_group para consolidar ventas por tienda, estado, cliente, fecha.
+    Ejemplo de fields: ["amount_total:sum", "id:count_distinct"]
+    Ejemplo de groupby: ["config_id", "partner_id", "state", "date_order:day"]
+    """
+    kwargs = {
+        "domain": domain or [],
+        "fields": fields,
+        "groupby": groupby or [],
+        "limit": limit,
+        "offset": offset,
+    }
+    if orderby:
+        kwargs["orderby"] = orderby
+    return exec_kw("pos.order", "read_group", [], kwargs)
+
+
+@mcp.tool
+def odoo_pos_ventas_por_producto(
+    fields: list,
+    domain: list = None,
+    groupby: list = None,
+    limit: int = 80,
+    offset: int = 0,
+    orderby: str = None
+) -> list:
+    """
+    Usa pos.order.line con read_group para consolidar ventas por producto, categoría,
+    presentaciones y cantidades.
+    Ejemplo de fields: ["price_subtotal:sum", "qty:sum"]
+    Ejemplo de groupby: ["product_id", "full_product_name", "category_id"]
+    """
+    kwargs = {
+        "domain": domain or [],
+        "fields": fields,
+        "groupby": groupby or [],
+        "limit": limit,
+        "offset": offset,
+    }
+    if orderby:
+        kwargs["orderby"] = orderby
+    return exec_kw("pos.order.line", "read_group", [], kwargs)
